@@ -37,11 +37,11 @@ const sendOtpMail = async (email, otp) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px;">
         <h2 style="margin-bottom: 16px; color: #111827;">Account Verification</h2>
-        <p style="margin: 0 0 12px; color: #374151;">Aapke account ko verify karne ke liye ye OTP use karein:</p>
+        <p style="margin: 0 0 12px; color: #374151;">Use this OTP to verify your account:</p>
         <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 18px; text-align: center; font-size: 32px; letter-spacing: 8px; color: #065f46; font-weight: 700;">
           ${otp}
         </div>
-        <p style="margin-top: 16px; color: #6b7280; font-size: 13px;">Ye OTP 5 minute ke liye valid hai.</p>
+        <p style="margin-top: 16px; color: #6b7280; font-size: 13px;">his OTP is valid for 5 minutes.</p>
       </div>
     `,
   });
@@ -357,11 +357,11 @@ exports.changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
     if (!newPassword || newPassword.length < 6)
-      return res.status(400).json({ message: "Naya password kam se kam 6 character ka ho" });
+      return res.status(400).json({ message: "Naya password kam se kam 6 character ka hona chahiye." });
 
     const user = await User.findById(req.user.id).select("+password");
     const ok = await bcrypt.compare(oldPassword || "", user.password);
-    if (!ok) return res.status(400).json({ message: "Purana password galat hai" });
+    if (!ok) return res.status(400).json({ message: "Purana password galat hai." });
 
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();

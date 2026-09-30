@@ -147,6 +147,13 @@ module.exports = (io) => {
         .forEach((m) => io.to(`user:${m}`).emit("typing", { chatId, userId: uid, isTyping }));
     });
 
+    socket.on("user:logout", async () => {
+      online.delete(uid);
+      const u = await User.findByIdAndUpdate(uid, { isOnline: false, lastSeen: new Date() }, { new: true });
+      if (u) broadcastPresence(io, u);
+      socket.disconnect();
+    });
+
     // ---------- DISCONNECT ----------
     socket.on("disconnect", async () => {
       const c = (online.get(uid) || 1) - 1;
