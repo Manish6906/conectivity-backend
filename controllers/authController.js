@@ -191,12 +191,6 @@ exports.loginRequestOtp = async (req, res) => {
     if (!user.emailVerified)
       return res.status(400).json({ message: "Email is not verified yet. Please complete registration verification first." });
 
-    if (user.isDeactivated) {
-      return res.status(403).json({
-        message: "Your account is deactivated. Reactivate it before logging in.",
-      });
-    }
-
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ message: "Invalid credentials" });
 
@@ -269,12 +263,6 @@ exports.login = async (req, res) => {
 
     if (!user.emailVerified)
       return res.status(400).json({ message: "Email is not verified yet. Please complete registration verification first." });
-
-    if (user.isDeactivated) {
-      return res.status(403).json({
-        message: "Your account is deactivated. Reactivate it before logging in.",
-      });
-    }
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ message: "Invalid credentials" });
