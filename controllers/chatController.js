@@ -77,6 +77,10 @@ exports.direct = async (req, res) => {
   try {
     const me = req.user.id;
     const other = req.params.userId;
+    const otherUser = await User.findById(other).select("isDeactivated");
+    if (!otherUser) return res.status(404).json({ message: "User nahi mila" });
+    if (otherUser.isDeactivated)
+      return res.status(403).json({ message: "Ye account deactivate hai. Ab chat nahi ho sakta." });
     if (!(await areFriends(me, other)))
       return res.status(403).json({ message: "Pehle friend bano" });
 
@@ -99,6 +103,10 @@ exports.group = async (req, res) => {
     if (!name?.trim()) return res.status(400).json({ message: "Group ka naam do" });
     if (!Array.isArray(members) || members.length < 1)
       return res.status(400).json({ message: "Kam se kam 1 member chuno" });
+
+    const deactivatedMember = await User.findOne({ _id: { $in: members.map(String) }, isDeactivated: true });
+    if (deactivatedMember)
+      return res.status(403).json({ message: "Deactivate account ko group me add nahi kar sakte." });
 
     const fr = await FriendRequest.find({
       status: "accepted",

@@ -33,15 +33,15 @@ const sendOtpMail = async (email, otp) => {
   await transporter.sendMail({
     from: `"Connectivity" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Email verification OTP",
+    subject: "Account verification OTP",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px;">
-        <h2 style="margin-bottom: 16px; color: #111827;">Email Verification</h2>
+        <h2 style="margin-bottom: 16px; color: #111827;">Account Verification</h2>
         <p style="margin: 0 0 12px; color: #374151;">Aapke account ko verify karne ke liye ye OTP use karein:</p>
         <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 18px; text-align: center; font-size: 32px; letter-spacing: 8px; color: #065f46; font-weight: 700;">
           ${otp}
         </div>
-        <p style="margin-top: 16px; color: #6b7280; font-size: 13px;">Ye OTP 10 minute ke liye valid hai.</p>
+        <p style="margin-top: 16px; color: #6b7280; font-size: 13px;">Ye OTP 5 minute ke liye valid hai.</p>
       </div>
     `,
   });
@@ -74,7 +74,7 @@ exports.register = async (req, res) => {
         password: hashed,
         emailVerified: false,
         otpCode: otp,
-        otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        otpExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
       },
       { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
     );
@@ -146,12 +146,12 @@ exports.resendOtp = async (req, res) => {
 
     const otp = makeOtp();
     user.otpCode = otp;
-    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
     user.emailVerified = false;
     await user.save();
 
     await sendOtpMail(user.email, otp);
-    res.json({ message: "Naya OTP aapke email par bheja gaya hai." });
+    res.json({ message: "A new OTP has been sent to your email." });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -202,7 +202,7 @@ exports.loginRequestOtp = async (req, res) => {
 
     const otp = makeOtp();
     user.loginOtpCode = otp;
-    user.loginOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    user.loginOtpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
 
     await sendOtpMail(user.email, otp);

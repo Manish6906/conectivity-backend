@@ -10,7 +10,7 @@ exports.listUsers = async (req, res) => {
   try {
     const meId = req.user.id;
     const me = await User.findById(meId).select("blocked");
-    const users = await User.find({ _id: { $ne: meId } }).sort({ name: 1 });
+    const users = await User.find({ _id: { $ne: meId }, isDeactivated: false }).sort({ name: 1 });
     const reqs = await FriendRequest.find({ $or: [{ from: meId }, { to: meId }] });
 
     const list = users.map((u) => {
@@ -68,6 +68,8 @@ exports.getProfile = async (req, res) => {
     ]);
 
     if (!target) return res.status(404).json({ message: "User nahi mila" });
+    if (String(targetId) !== String(viewerId) && target.isDeactivated)
+      return res.status(410).json({ message: "Ye account deactivate hai." });
     const relation = String(targetId) === String(viewerId) ? "self" : rel ? "friends" : "none";
     const publicProfile = getVisibleProfile(viewerId, target, relation);
     res.json({ user: publicProfile });

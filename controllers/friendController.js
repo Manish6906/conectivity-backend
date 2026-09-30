@@ -14,10 +14,12 @@ exports.sendRequest = async (req, res) => {
     if (me === to) return res.status(400).json({ message: "Khud ko request nahi bhej sakte" });
 
     const [target, meDoc] = await Promise.all([
-      User.findById(to).select("blocked"),
+      User.findById(to).select("blocked isDeactivated"),
       User.findById(me).select("blocked"),
     ]);
     if (!target) return res.status(404).json({ message: "User nahi mila" });
+    if (target.isDeactivated)
+      return res.status(403).json({ message: "Ye account deactivate hai. Request nahi bhej sakte." });
     if (target.blocked.some((b) => String(b) === me))
       return res.status(403).json({ message: "Request nahi bhej sakte" });
     if (meDoc.blocked.some((b) => String(b) === to))
