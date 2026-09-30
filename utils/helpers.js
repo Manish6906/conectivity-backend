@@ -54,10 +54,14 @@ exports.getVisibleProfile = (viewerId, target, relation = "none") => {
 // status: sent | delivered | seen
 exports.serializeMessage = (m, memberCount) => {
   const o = m.toObject ? m.toObject() : m;
-  const others = memberCount - 1;
+  const seenBy = Array.isArray(o.seenBy) ? o.seenBy : [];
+  const deliveredTo = Array.isArray(o.deliveredTo) ? o.deliveredTo : [];
+  const others = Math.max((Number(memberCount) || 1) - 1, 0);
+
   let status = "sent";
-  if (o.seenBy.length >= others) status = "seen";
-  else if (o.deliveredTo.length >= others) status = "delivered";
+  if (seenBy.length >= others) status = "seen";
+  else if (deliveredTo.length >= others) status = "delivered";
+
   return {
     _id: String(o._id),
     chat: String(o.chat),
